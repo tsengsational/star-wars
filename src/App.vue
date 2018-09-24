@@ -9,14 +9,16 @@
           </option>
         </select>
       </div>
-      <div class="info" v-if="displayInfo" >
-        <h2>Character:</h2> 
-        <div class="name">{{displayInfo.name}}</div>
-        <h2>Films:</h2>
-        <p>(click a film to see the scrawl! warning: background music autoplays)</p>
-        <div class="films" >
-
-          <film v-for="(film, key) in displayInfo.films" :key="key" :url="film" ></film>
+      <div class="loading" v-if="loading" ><font-awesome-icon icon="spinner" spin ></font-awesome-icon> </div>
+      <div class="info-container" :class="{hide: loading}" >
+        <div class="info" v-if="displayInfo" >
+          <h2>Character:</h2> 
+          <div class="name">{{displayInfo.name}}</div>
+          <h2>Films:</h2>
+          <p>(click a film to see the scrawl! warning: background music autoplays)</p>
+          <div class="films" >
+            <film v-for="(film, key) in displayInfo.films" :key="key" :url="film" ></film>
+          </div>
         </div>
       </div>
     </div>
@@ -35,7 +37,8 @@ export default {
   data() {
     return {
       characters: characterObj.characters,
-      displayInfo: null
+      displayInfo: null,
+      loading: false
     }
   },
   methods: {
@@ -46,6 +49,7 @@ export default {
       this.getInfo(url, index)
     },
     getInfo(url, index) {
+      this.loading = true;
       if (!url.includes("unknown")) {
         fetch(url)
           .then(response => {
@@ -54,6 +58,9 @@ export default {
           }).then(json => {
             console.log("id:", json)
             this.displayInfo = json
+            setTimeout(() => {
+              this.loading = false;
+            }, 1000)
           })
       } else {
         const name = this.characters[index].name;
@@ -67,6 +74,9 @@ export default {
           .then(json => {
             console.log("search:", json)
             this.displayInfo = json.results[0]
+            setTimeout(() => {
+              this.loading = false;
+            }, 1000)
           })
       }
     }
@@ -93,6 +103,13 @@ export default {
     position: relative;
     left: calc(50% - 250px);
     margin-top: 150px;
+  }
+
+  .info-container {
+    opacity: 1;
+    &.hide {
+      opacity: 0;
+    }
   }
 
   .select-container {
@@ -125,5 +142,21 @@ export default {
 
   }
 
+  .loading {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    left: calc(50% - 100px);
+    top: 100px;
+    font-size: 50px;
+    color: $light-gray;
+    text-align: center;
+  }
+
+  .films {
+    display: flex;
+    flex-direction: row;
+    flex-wrap:wrap;
+  }
 
 </style>

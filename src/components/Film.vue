@@ -72,9 +72,15 @@ export default {
         margin: 10px 0;
         cursor: pointer;
         color: $light-gray;
-        transition: color .3s;
+        transition: color .3s, border .3s;
+        width: 200px;
+        padding: 10px;
+        border: 1px $light-gray solid;
+        border-radius: 8px;
+        margin-right: 16px;
         &:hover {
             color: $green;
+            border: 1px $green solid;
         }
 
 
