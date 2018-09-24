@@ -1,28 +1,129 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <div class="wrapper">
+      <div class="select-container" >
+        <select class="character-select" @change="handleChange" >
+          <option value="" selected disabled >Select a Character</option>
+          <option v-for="(character, key) in characters" :key="key" > 
+              {{character.name}}
+          </option>
+        </select>
+      </div>
+      <div class="info" v-if="displayInfo" >
+        <h2>Character:</h2> 
+        <div class="name">{{displayInfo.name}}</div>
+        <h2>Films:</h2>
+        <p>(click a film to see the scrawl! warning: background music autoplays)</p>
+        <div class="films" >
+
+          <film v-for="(film, key) in displayInfo.films" :key="key" :url="film" ></film>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import characterObj from './assets/characters';
+import Film from './components/Film'
 
 export default {
   name: 'app',
   components: {
-    HelloWorld
+    Film
+  },
+  data() {
+    return {
+      characters: characterObj.characters,
+      displayInfo: null
+    }
+  },
+  methods: {
+    handleChange(event) {
+      console.log(event.target.selectedIndex)
+      const index = event.target.selectedIndex - 1;
+      const url = this.characters[index].url;
+      this.getInfo(url, index)
+    },
+    getInfo(url, index) {
+      if (!url.includes("unknown")) {
+        fetch(url)
+          .then(response => {
+            console.log(response)
+              return response.json()
+          }).then(json => {
+            console.log("id:", json)
+            this.displayInfo = json
+          })
+      } else {
+        const name = this.characters[index].name;
+        const string = `https://swapi.co/api/people/?search=${name}`
+        const path = encodeURI(string)
+        console.log(name, path)
+        fetch(path)
+          .then(resp => {
+            return resp.json()
+          })
+          .then(json => {
+            console.log("search:", json)
+            this.displayInfo = json.results[0]
+          })
+      }
+    }
   }
 }
 </script>
 
-<style>
-#app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
+<style lang="scss" >
+@import './assets/settings.scss';
+
+  #app {
+    background-color: $dark-gray;
+    height: 100vh;
+    width: 100vw;
+    position: fixed;
+    top: 0;
+    left: 0;
+    color: $light-gray;
+    font-family: Arial;
+  }
+
+  .wrapper {
+    width: 500px;
+    position: relative;
+    left: calc(50% - 250px);
+    margin-top: 150px;
+  }
+
+  .select-container {
+    position: relative;
+    width: 200px;
+      &::after {
+      position: absolute;
+      content: "";
+      top: 16px;
+      right: 10px;
+      width: 0;
+      height: 0;
+      border: 6px solid transparent;
+      border-color: $dark-gray transparent transparent transparent;
+      z-index: 1;
+    }
+  }
+
+  select.character-select {
+    width: 200px;
+    height: 40px;
+    background-color: $white;
+    border: 1px $light-gray solid;
+    padding-left: 20px;
+    font-size: 14px;
+    appearance: none;
+    border-radius: 8px;
+    position: relative;
+    margin-bottom: 16px;
+
+  }
+
+
 </style>
